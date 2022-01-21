@@ -1,0 +1,118 @@
+library("DBI")
+library("odbc")
+library("tidyverse")
+library("dplyr")
+library("lubridate")
+library("stringr")
+library("data.table")
+
+setwd("C:\\Users\\lillcam\\Documents\\provision3")
+
+source("query_powerview_SQL.R")
+source("query_provision3_SQL.R")
+
+inicial = '2019-01-01 08:00:00'
+final   = '2022-01-20 08:00:00'
+
+con1 <- dbConnect(odbc(),
+                  Driver = "SQL Server",
+                  Server = "CJCSPC-VMPVIEW",
+                  Database = "PowerView",
+                  UID = "consultas",
+                  PWD = "C0t4susr20!",
+                  Port = 1433)
+
+BDPW = query_powerview(inicial, final)
+
+hexproot = BDPW$hist_exproot
+hpvs3id  = BDPW$hist_pvs3id
+hdumps   = BDPW$hist_dumps
+hloads   = BDPW$hist_loads
+hdumps$origen  = hdumps$grade
+hdumps$destino = hdumps$loc
+
+hexproot$shiftindex = as.character(hexproot$shiftindex)
+hpvs3id$shiftindex  = as.character(hpvs3id$shiftindex)
+
+hpvs3id$auxid = paste(hpvs3id$excav, "_", hpvs3id$shiftindex, "_", hpvs3id$timefull, sep = "")
+
+hloads$shiftindex = as.character(hloads$shiftindex)
+hdumps$shiftindex = as.character(hdumps$shiftindex)
+hdumps$fecha = hdumps$shiftindex
+
+con2 <- dbConnect(odbc(),
+                  Driver = "SQL Server",
+                  Server = "10.41.167.228",
+                  Database = "IntelliMineNextGenSPENCE",
+                  UID = "lillcam",
+                  PWD = ".t.GAM78.z.u.WJP")
+
+QQ = BDP3(inicio, final)
+Q1 = QQ$Q1; Q2 = QQ$Q2
+Q3 = left_join(Q1, Q2, by = c("CycleID" = "CycleID"))
+Q3 = Q3[!duplicated(Q3$CycleID),]
+
+Q3$dspShiftID = as.character(Q3$dspShiftID)
+
+Q4   = full_join(Q3, hexproot, by = c("dspShiftID" = "shiftindex"))
+Q5_1 = full_join(Q4, hpvs3id, by = c("dspShiftID" = "shiftindex", "DispLoad" = "pvs3id"))
+Q5_2 = full_join(Q4, hpvs3id, by = c("dspShiftID" = "shiftindex", "DispLoad" = "auxid"))
+Q5_1 = Q5_1 %>% select(-"auxid")
+Q5_2 = Q5_2 %>% select(-"pvs3id")
+Q5   = rbind(Q5_1, Q5_2)
+Q5   = unique(Q5)
+
+Q6   = full_join(Q5, hloads,
+               by = c("dspShiftID" = "shiftindex",
+                      "shiftlink" = "shiftlink"))
+
+Q7 = full_join(Q6, hdumps,
+               by = c("dspShiftID" = "shiftindex",
+                      "dumprec" = "ddbkey"))
+
+Q7$BucketCount[Q7$BucketCount == 0] = 1
+Q7$Hora = round(Q7$timeload.x/3600, 0)
+Q7$BucketLoad     = Q7$TCapacity/Q7$BucketCount
+Q7$BucketLoadTons = Q7$loadtons/Q7$BucketCount
+Q7$compid = "camiones"
+Q7$midx = Q7$DigPointX
+Q7$midy = Q7$DigPointY
+Q7$midz = Q7$DigPointZ
+Q8 = Q7 %>% filter(!is.na(dumptons))
+
+date_aux = na.omit(unique(data.frame(shiftdate2 = Q8$shiftdate, fecha = Q8$fecha)))
+
+Q9  = merge(Q8, date_aux, 
+              by.x = "fecha", 
+              by.y = "fecha",
+              all.x = TRUE, all.y = FALSE)
+
+Q9 = as_tibble(Q9)
+
+Q9 = Q9 %>% select(-shiftdate)
+
+names(Q9)[names(Q9) == "shiftdate2"] = "shiftdate" 
+
+Q10 =
+  Q9 %>% select("compid", "midx", "midy", "midz",
+                "PRecID", "LoadStart", "shiftdate",  "name", "Hora",
+                "timeload.x", "timedump", "excav",
+                "UType", "TUnit", "TCapacity", "fecha",
+                "dumptons", "origen", "destino",
+                "loadtons", "BucketLoad", "BucketLoadTons", "Bucket", "BucketCount",
+                "DigGpsGrade", "DigOperGrade", "grade.x",
+                "DigGpsMat", "DigOpMat", "DispLoad", "loc.y", "edlock.y",
+                "gpsxtkd", "gpsytkd", "gpsztkd")
+
+Q10$internal = c(1:NROW(Q10))
+Q10_to_vulcan = Q10 %>% select("compid", "midx", "midy", "midz", "internal") %>% filter((!is.na(midx))&(!is.na(midy))&(!is.na(midz)))
+Q10_to_vulcan$cut         = -99
+Q10_to_vulcan$clay        = -99
+Q10_to_vulcan$minty_corto = -99
+Q10_to_vulcan$malla100    = -99
+
+fwrite(Q10, "2022_W02_full.csv")
+
+
+
+
