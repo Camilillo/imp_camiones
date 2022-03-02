@@ -1,0 +1,391 @@
+library("data.table")
+library("stringr")
+library("tidyverse")
+library("firatheme")
+
+setwd("C:\\Users\\lillcam\\Desktop\\2022SEM08")
+
+name_MAC = "SPC_MAC_18feb22_final.bmf.asc"
+
+data = fread(name_MAC)
+data = as_tibble(data)
+
+data2 = data %>% filter(pol_index > 0)
+
+aux22 = str_split(data2$pol_index/1000, "\\.", simplify = TRUE)
+fase  = paste("F", aux22[,1], sep = "")
+fase[(data2$zcentre <= 1572.5)&(fase == "F1")] = "H01"
+fase[(data2$zcentre <= 1602.5)&(fase == "F2")] = "H02"
+
+banc = data2$zcentre - 7.5
+
+data2$oretype = -99
+data2$oretype[(data2$minty_corto ==  2)&(data2$cut >= 1.0)]                   = "OXA"
+data2$oretype[(data2$minty_corto ==  1)&(data2$cut >= 0.3)&(data2$cut < 1.0)] = "OXB"
+data2$oretype[(data2$minty_corto == 11)&(data2$cut >= 0.2)&(data2$cut < 0.3)] = "OXM"
+
+data2$oretype[(data2$minty_corto ==  4)&(data2$cut >= 0.6)]                   = "SUA"
+data2$oretype[(data2$minty_corto ==  3)&(data2$cut >= 0.3)&(data2$cut < 0.6)] = "SUB"
+data2$oretype[(data2$minty_corto == 31)&(data2$cut >= 0.2)&(data2$cut < 0.3)] = "SUM"
+
+data2$oretype[(data2$minty_corto == 54)&(data2$cut >= 0.4)]                   = "TAL"
+data2$oretype[(data2$minty_corto == 53)&(data2$cut >= 0.3)&(data2$cut < 0.4)] = "TME"
+data2$oretype[(data2$minty_corto == 52)&(data2$cut >= 0.2)&(data2$cut < 0.3)] = "TBA"
+
+data2$oretype[(data2$minty_corto == 63)&(data2$cut >= 0.4)]                   = "HAL"
+data2$oretype[(data2$minty_corto == 62)&(data2$cut >= 0.3)&(data2$cut < 0.4)] = "HME"
+data2$oretype[(data2$minty_corto == 61)&(data2$cut >= 0.2)&(data2$cut < 0.3)] = "HBA"
+
+data2$oretype[(data2$minty_corto ==  7)&(data2$cut >= 0.0)&(data2$cut < 0.2)] = "LAS"
+data2$oretype[(data2$minty_corto ==  8)&(data2$cut <  0.25)]                  = "DIQ"
+
+### 
+
+aux22[,2][aux22[,2] == "01"] = "010"
+aux22[,2][aux22[,2] == "02"] = "020"
+aux22[,2][aux22[,2] == "03"] = "030"
+aux22[,2][aux22[,2] == "04"] = "040"
+aux22[,2][aux22[,2] == "05"] = "050"
+aux22[,2][aux22[,2] == "06"] = "060"
+aux22[,2][aux22[,2] == "07"] = "070"
+aux22[,2][aux22[,2] == "08"] = "080"
+aux22[,2][aux22[,2] == "09"] = "090"
+
+data2$fase_patio = paste(fase, "-", banc, "-", aux22[,2], "/", data2$oretype, sep = "")
+
+
+
+
+auxx = data2 %>% filter(str_detect(fase_patio, "H01-1490"))
+
+sort(unique(auxx$fase_patio))
+
+data3 = as_tibble(data2)
+
+data3$fase  = fase
+data3$banco = banc
+data3$patio = aux22[,2]
+
+bd_p01 =
+data3 %>% 
+  filter(oretype != -99) %>%
+  filter(cut >= 0) %>%
+  group_by(fase_patio)  %>%
+  summarise(ton  = sum(xlength * ylength * zlength * densidad),
+            cut_polimp  = sum(xlength * ylength * zlength * densidad *  cut)/ton)
+
+bd_p02 =
+  data3 %>% 
+  filter(oretype != -99) %>%
+  filter(cus >= 0) %>%
+  group_by(fase_patio)  %>%
+  summarise(ton  = sum(xlength * ylength * zlength * densidad),
+            cus_polimp  = sum(xlength * ylength * zlength * densidad *  cus)/ton)
+            
+bd_p03 =
+  data3 %>% 
+  filter(oretype != -99) %>%
+  filter(cufe >= 0) %>%
+  group_by(fase_patio)  %>%
+  summarise(ton  = sum(xlength * ylength * zlength * densidad),
+            cufe_polimp = sum(xlength * ylength * zlength * densidad * cufe)/ton)
+
+bd_p04 =
+  data3 %>% 
+  filter(oretype != -99) %>%
+  filter(cucn >= 0) %>%
+  group_by(fase_patio)  %>%
+  summarise(ton  = sum(xlength * ylength * zlength * densidad),
+            cucn_polimp = sum(xlength * ylength * zlength * densidad * cucn)/ton)
+
+bd_p05 =
+  data3 %>% 
+  filter(oretype != -99) %>%
+  filter(co3 >= 0) %>%
+  group_by(fase_patio)  %>%
+  summarise(ton  = sum(xlength * ylength * zlength * densidad),
+            co3_polimp  = sum(xlength * ylength * zlength * densidad *  co3)/ton)
+
+bd_p06 =
+  data3 %>% 
+  filter(oretype != -99) %>%
+  filter(malla100 >= 0) %>%
+  group_by(fase_patio)  %>%
+  summarise(ton  = sum(xlength * ylength * zlength * densidad),
+            malla100_polimp  = sum(xlength * ylength * zlength * densidad * malla100 )/ton)
+
+bd_p07 =
+  data3 %>% 
+  filter(oretype != -99) %>%
+  filter(lito >= 0) %>%
+  group_by(fase_patio)  %>%
+  summarise(ton  = sum(xlength * ylength * zlength * densidad),
+            lito_polimp = which.max(table(lito)))
+
+bd_p08 =
+  data3 %>% 
+  filter(oretype != -99) %>%
+  filter(alt >= 0) %>%
+  group_by(fase_patio)  %>%
+  summarise(ton  = sum(xlength * ylength * zlength * densidad),
+            alte_polimp = which.max(table(alt)))
+
+bd_p09 =
+  data3 %>% 
+  filter(oretype != -99) %>%
+  filter(minty_corto >= 0) %>%
+  group_by(fase_patio)  %>%
+  summarise(ton  = sum(xlength * ylength * zlength * densidad),
+            minty_corto_polimp = which.max(table(minty_corto)))
+
+bd_p10 =
+  data3 %>% 
+  filter(oretype != -99) %>%
+  filter(rec_mx_cu >= 0) %>%
+  group_by(fase_patio)  %>%
+  summarise(ton  = sum(xlength * ylength * zlength * densidad),
+            rec_mx_cu_polimp = sum(xlength * ylength * zlength * densidad * rec_mx_cu)/ton)
+
+bd_p11 =
+  data3 %>% 
+  filter(oretype != -99) %>%
+  filter(mo >= 0) %>%
+  group_by(fase_patio)  %>%
+  summarise(ton  = sum(xlength * ylength * zlength * densidad),
+             mo_polimp  = sum(xlength * ylength * zlength * densidad *   mo)/ton)
+
+bd_p12 =
+  data3 %>% 
+  filter(oretype != -99) %>%
+  filter(bwi >= 0) %>%
+  group_by(fase_patio)  %>%
+  summarise(ton  = sum(xlength * ylength * zlength * densidad),
+            bwi_polimp = sum(xlength * ylength * zlength * densidad *  bwi)/ton)
+
+bd_p13 =
+  data3 %>% 
+  filter(oretype != -99) %>%
+  filter(spi>= 0) %>%
+  group_by(fase_patio)  %>%
+  summarise(ton  = sum(xlength * ylength * zlength * densidad),
+            spi_polimp = sum(xlength * ylength * zlength * densidad *  spi)/ton)
+
+            
+bd_p14 =
+  data3 %>% 
+  filter(oretype != -99) %>%
+  filter(py >= 0) %>%
+  group_by(fase_patio)  %>%
+  summarise(ton  = sum(xlength * ylength * zlength * densidad),
+            py_polimp   = sum(xlength * ylength * zlength * densidad *  py)/ton)
+
+bd_p15 =
+  data3 %>% 
+  filter(oretype != -99) %>%
+  filter(musc >= 0) %>%
+  group_by(fase_patio)  %>%
+  summarise(ton  = sum(xlength * ylength * zlength * densidad),
+            musc_polimp  = sum(xlength * ylength * zlength * densidad *  musc)/ton)
+
+bd_p16 =
+  data3 %>% 
+  filter(oretype != -99) %>%
+  filter(quar >= 0) %>%
+  group_by(fase_patio)  %>%
+  summarise(ton  = sum(xlength * ylength * zlength * densidad),
+            quar_polimp  = sum(xlength * ylength * zlength * densidad *  quar)/ton)
+
+bd_p17 =
+  data3 %>% 
+  filter(oretype != -99) %>%
+  filter(bclay >= 0) %>%
+  group_by(fase_patio)  %>%
+  summarise(ton  = sum(xlength * ylength * zlength * densidad),
+            bclay_polimp = sum(xlength * ylength * zlength * densidad *  bclay)/ton)
+
+bd_p18 =
+  data3 %>% 
+  filter(oretype != -99) %>%
+  filter(as >= 0) %>%
+  group_by(fase_patio)  %>%
+  summarise(ton  = sum(xlength * ylength * zlength * densidad),
+            as_polimp = sum(xlength * ylength * zlength * densidad *  as)/ton)
+
+bd_p19 =
+  data3 %>% 
+  filter(oretype != -99) %>%
+  filter(au >= 0) %>%
+  group_by(fase_patio)  %>%
+  summarise(ton  = sum(xlength * ylength * zlength * densidad),
+            au_polimp = sum(xlength * ylength * zlength * densidad *  au)/ton)
+
+bd_p20 =
+  data3 %>% 
+  filter(oretype != -99) %>%
+  filter(ag >= 0) %>%
+  group_by(fase_patio)  %>%
+  summarise(ton  = sum(xlength * ylength * zlength * densidad),
+            ag_polimp = sum(xlength * ylength * zlength * densidad *  ag)/ton)
+
+bd_p21 =
+  data3 %>% 
+  filter(oretype != -99) %>%
+  filter(densidad >= 0) %>%
+  group_by(fase_patio)  %>%
+  summarise(ton  = sum(xlength * ylength * zlength * densidad),
+            densidad_polimp = sum(xlength * ylength * zlength * densidad *  densidad)/ton)
+
+bd_p22 =
+  data3 %>% 
+  filter(oretype != -99) %>%
+  filter(rec_denver_nir_min20_recmass10 >= 0) %>%
+  group_by(fase_patio)  %>%
+  summarise(ton  = sum(xlength * ylength * zlength * densidad),
+            rec_denver_nir_min20_recmass10_polimp = sum(xlength * ylength * zlength * densidad * rec_denver_nir_min20_recmass10)/ton)
+
+bd_p23 =
+  data3 %>% 
+  filter(oretype != -99) %>%
+  filter(rec_denver_nir_min20_recmass10 >= 0) %>%
+  group_by(fase_patio)  %>%
+  summarise(ton  = sum(xlength * ylength * zlength * densidad),
+            rec_cu_denver_min20_polimp            = sum(xlength * ylength * zlength * densidad * rec_cu_denver_min20)/ton)
+
+bd_p24 =
+  data3 %>% 
+  filter(oretype != -99) %>%
+  filter(rec_mass_denver_min20 >= 0) %>%
+  group_by(fase_patio)  %>%
+  summarise(ton  = sum(xlength * ylength * zlength * densidad),
+            rec_mass_denver_min20_polimp          = sum(xlength * ylength * zlength * densidad * rec_mass_denver_min20)/ton)
+
+bd_p02 = bd_p02 %>% select(-ton)
+bd_p03 = bd_p03 %>% select(-ton)
+bd_p04 = bd_p04 %>% select(-ton)
+bd_p05 = bd_p05 %>% select(-ton)
+bd_p06 = bd_p06 %>% select(-ton)
+bd_p07 = bd_p07 %>% select(-ton)
+bd_p08 = bd_p08 %>% select(-ton)
+bd_p09 = bd_p09 %>% select(-ton)
+bd_p10 = bd_p10 %>% select(-ton)
+bd_p11 = bd_p11 %>% select(-ton)
+bd_p12 = bd_p12 %>% select(-ton)
+bd_p13 = bd_p13 %>% select(-ton)
+bd_p14 = bd_p14 %>% select(-ton)
+bd_p15 = bd_p15 %>% select(-ton)
+bd_p16 = bd_p16 %>% select(-ton)
+bd_p17 = bd_p17 %>% select(-ton)
+bd_p18 = bd_p18 %>% select(-ton)
+bd_p19 = bd_p19 %>% select(-ton)
+bd_p20 = bd_p20 %>% select(-ton)
+bd_p21 = bd_p21 %>% select(-ton)
+bd_p22 = bd_p22 %>% select(-ton)
+bd_p23 = bd_p23 %>% select(-ton)
+bd_p24 = bd_p24 %>% select(-ton)
+
+
+
+bd_a01 = left_join(bd_p01,  
+                   bd_p02,  
+                   by = "fase_patio")
+
+bd_a02 = left_join(bd_a01,  
+                   bd_p03,  
+                   by = "fase_patio")
+
+bd_a03 = left_join(bd_a02,  
+                   bd_p04,  
+                   by = "fase_patio")
+
+bd_a04 = left_join(bd_a03,  
+                   bd_p05,  
+                   by = "fase_patio")
+
+bd_a05 = left_join(bd_a04,  
+                   bd_p06,  
+                   by = "fase_patio")
+
+bd_a06 = left_join(bd_a05,  
+                   bd_p07,  
+                   by = "fase_patio")
+
+bd_a07 = left_join(bd_a06,  
+                   bd_p08,  
+                   by = "fase_patio")
+
+bd_a08 = left_join(bd_a07,  
+                   bd_p09,  
+                   by = "fase_patio")
+
+bd_a09 = left_join(bd_a08,  
+                   bd_p10,  
+                   by = "fase_patio")
+
+bd_a10 = left_join(bd_a09,  
+                   bd_p11,  
+                   by = "fase_patio")
+
+bd_a11 = left_join(bd_a10,  
+                   bd_p12,  
+                   by = "fase_patio")
+
+bd_a12 = left_join(bd_a11,  
+                   bd_p13,  
+                   by = "fase_patio")
+
+bd_a13 = left_join(bd_a12,  
+                   bd_p14,  
+                   by = "fase_patio")
+
+bd_a14 = left_join(bd_a13,  
+                   bd_p15,  
+                   by = "fase_patio")
+
+bd_a15 = left_join(bd_a14,  
+                   bd_p16,  
+                   by = "fase_patio")
+
+bd_a16 = left_join(bd_a15,  
+                   bd_p17,  
+                   by = "fase_patio")
+
+bd_a17 = left_join(bd_a16,  
+                   bd_p18,  
+                   by = "fase_patio")
+
+bd_a18 = left_join(bd_a17,  
+                   bd_p19,  
+                   by = "fase_patio")
+
+bd_a19 = left_join(bd_a18,  
+                   bd_p20,  
+                   by = "fase_patio")
+
+bd_a20 = left_join(bd_a19,  
+                   bd_p21,  
+                   by = "fase_patio")
+
+bd_a21 = left_join(bd_a20,  
+                   bd_p22,  
+                   by = "fase_patio")
+
+bd_a22 = left_join(bd_a21,  
+                   bd_p23,  
+                   by = "fase_patio")
+
+bd_a23 = left_join(bd_a22,  
+                   bd_p24,  
+                   by = "fase_patio")
+
+bd_patios = bd_a23
+
+fwrite(bd_patios, paste("patio_destino_", name_MAC, ".csv", sep = ""))
+
+##########################################################################################
+##########################################################################################
+##########################################################################################
+
+
+
+
+
