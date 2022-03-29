@@ -3,9 +3,9 @@ library("stringr")
 library("tidyverse")
 library("firatheme")
 
-setwd("C:\\Users\\lillcam\\Desktop\\2022SEM08")
+setwd("C:\\Users\\lillcam\\Documents\\mine compliance\\camiones_W11")
 
-name_MAC = "SPC_MAC_18feb22_final.bmf.asc"
+name_MAC = "modpozos06_OC_final.asc"
 
 data = fread(name_MAC)
 data = as_tibble(data)
@@ -67,7 +67,7 @@ data3$banco = banc
 data3$patio = aux22[,2]
 
 bd_p01 =
-data3 %>% 
+  data3 %>% 
   filter(oretype != -99) %>%
   filter(cut >= 0) %>%
   group_by(fase_patio)  %>%
@@ -81,7 +81,7 @@ bd_p02 =
   group_by(fase_patio)  %>%
   summarise(ton  = sum(xlength * ylength * zlength * densidad),
             cus_polimp  = sum(xlength * ylength * zlength * densidad *  cus)/ton)
-            
+
 bd_p03 =
   data3 %>% 
   filter(oretype != -99) %>%
@@ -152,7 +152,7 @@ bd_p11 =
   filter(mo >= 0) %>%
   group_by(fase_patio)  %>%
   summarise(ton  = sum(xlength * ylength * zlength * densidad),
-             mo_polimp  = sum(xlength * ylength * zlength * densidad *   mo)/ton)
+            mo_polimp  = sum(xlength * ylength * zlength * densidad *   mo)/ton)
 
 bd_p12 =
   data3 %>% 
@@ -170,7 +170,7 @@ bd_p13 =
   summarise(ton  = sum(xlength * ylength * zlength * densidad),
             spi_polimp = sum(xlength * ylength * zlength * densidad *  spi)/ton)
 
-            
+
 bd_p14 =
   data3 %>% 
   filter(oretype != -99) %>%
@@ -198,10 +198,10 @@ bd_p16 =
 bd_p17 =
   data3 %>% 
   filter(oretype != -99) %>%
-  filter(bclay >= 0) %>%
+  filter(clayb >= 0) %>%
   group_by(fase_patio)  %>%
   summarise(ton  = sum(xlength * ylength * zlength * densidad),
-            bclay_polimp = sum(xlength * ylength * zlength * densidad *  bclay)/ton)
+            bclay_polimp = sum(xlength * ylength * zlength * densidad *  clayb)/ton)
 
 bd_p18 =
   data3 %>% 
@@ -377,15 +377,6 @@ bd_a23 = left_join(bd_a22,
                    bd_p24,  
                    by = "fase_patio")
 
-bd_patios = bd_a23
+bd_patios = bd_a21
 
 fwrite(bd_patios, paste("patio_destino_", name_MAC, ".csv", sep = ""))
-
-##########################################################################################
-##########################################################################################
-##########################################################################################
-
-
-
-
-
