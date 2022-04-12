@@ -1,267 +1,264 @@
+setwd("C:\\Users\\lillcam\\Documents\\mine compliance\\camiones_W14")
+
 library("data.table")
 library("tidyverse")
-library("stringr")
 
-setwd("C:\\Users\\lillcam\\Desktop\\2022SEM08")
+data1 = fread("camiones_flagw14_gps_entry.csv")
 
-data1 = fread("camiones_w08_entry.csv")
-data2 = fread("patio_destino_SPC_MAC_18feb22_final.bmf.asc.csv")
+data2 = fread("patio_destino_modpozos06_OC_final.asc.csv")
+
+names(data2)[names(data2) == "cspcc"]    = "cspcc_polimp"  
+names(data2)[names(data2) == "cspcv"]    = "cspcv_polimp" 
+names(data2)[names(data2) == "cspcpy"]   = "cspcpy_polimp" 
+names(data2)[names(data2) == "cspcuoxi"] = "cspcuoxi_polimp" 
+names(data2)[names(data2) == "cspcuins"] = "cspcuins_polimp" 
+
 data2 = replace(data2, is.na(data2), -99)
-
 data1 = as_tibble(data1)
 data2 = as_tibble(data2)
+data1$origen = data1$d.source
 
-data3 = left_join(data1, data2, 
+data3 = left_join(data1, data2,
                   by = c("origen" = "fase_patio"))
-
-data3[,str_detect(names(data3), "polimp")] = 
-  replace(data3[,str_detect(names(data3), "polimp")], 
-          is.na(data3[,str_detect(names(data3), "polimp")]), 
+data3[,str_detect(names(data3), "polimp")] =
+  replace(data3[,str_detect(names(data3), "polimp")],
+          is.na(data3[,str_detect(names(data3), "polimp")]),
           -99)
+
+
 
 data3$cut_camiones = data3$cut
 data3$cut_camiones[data3$cut < 0] = data3$cut_polimp[data3$cut < 0]
 
 data3$cus_camiones = data3$cus
 data3$cus_camiones[data3$cus < 0] = data3$cus_polimp[data3$cus < 0]
-
 data3$cufe_camiones = data3$cufe
 data3$cufe_camiones[data3$cufe < 0] = data3$cufe_polimp[data3$cufe < 0]
-
 data3$cucn_camiones = data3$cucn
 data3$cucn_camiones[data3$cucn < 0] = data3$cucn_polimp[data3$cucn < 0]
 
 data3$co3_camiones = data3$co3
 data3$co3_camiones[data3$co3 < 0] = data3$co3_polimp[data3$co3 < 0]
-
-data3$malla100_camiones = data3$malla100
-data3$malla100_camiones[data3$malla100 < 0] = data3$malla100_polimp[data3$malla100 < 0]
-
-data3$alte_camiones = data3$alte
-data3$alte_camiones[data3$alte < 0] = data3$alte_polimp[data3$alte < 0]
-
+data3$malla100_camiones = data3$m100
+data3$malla100_camiones[data3$m100 < 0] = data3$malla100_polimp[data3$m100 < 0]
+data3$alte_camiones = data3$alt
+data3$alte_camiones[data3$alt < 0] = data3$alte_polimp[data3$alt < 0]
 data3$lito_camiones = data3$lito
 data3$lito_camiones[data3$lito < 0] = data3$lito_polimp[data3$lito < 0]
-
 data3$minty_corto_camiones = data3$minty_corto
 data3$minty_corto_camiones[data3$minty_corto < 0] = data3$minty_corto_polimp[data3$minty_corto < 0]
 
 data3$rec_mx_cu_camiones = data3$rec_esp
 data3$rec_mx_cu_camiones[data3$rec_esp < 0] = data3$rec_mx_cu_polimp[data3$rec_esp < 0]
-
-data3$mo_camiones = data3$moly
-data3$mo_camiones[data3$moly < 0] = data3$mo_polimp[data3$moly < 0]
-
+data3$mo_camiones = data3$mo
+data3$mo_camiones[data3$mo < 0] = data3$mo_polimp[data3$mo < 0]
 data3$bwi_camiones = data3$bwi
 data3$bwi_camiones[data3$bwi < 0] = data3$bwi_polimp[data3$bwi < 0]
-
 data3$spi_camiones = data3$spi
 data3$spi_camiones[data3$spi < 0] = data3$spi_polimp[data3$spi < 0]
-
-data3$py_camiones = data3$pirita
-data3$py_camiones[data3$pirita < 0] = data3$py_polimp[data3$pirita < 0]
+data3$py_camiones = data3$py_100
+data3$py_camiones[data3$py_100 < 0] = data3$py_polimp[data3$py_100 < 0]
 
 data3$musc_camiones = data3$musc
 data3$musc_camiones[data3$musc < 0] = data3$musc_polimp[data3$musc < 0]
-
 data3$quar_camiones = data3$quar
 data3$quar_camiones[data3$quar < 0] = data3$quar_polimp[data3$quar < 0]
-
-data3$bclay_camiones = data3$clay
-data3$bclay_camiones[data3$clay < 0] = data3$bclay_polimp[data3$clay < 0]
-
+data3$bclay_camiones = data3$bclay
+data3$bclay_camiones[data3$bclay < 0] = data3$bclay_polimp[data3$bclay < 0]
 data3$as_camiones = data3$as
 data3$as_camiones[data3$as < 0] = data3$as_polimp[data3$as < 0]
-
 data3$au_camiones = data3$au
 data3$au_camiones[data3$au < 0] = data3$au_polimp[data3$au < 0]
-
 data3$ag_camiones = data3$ag
 data3$ag_camiones[data3$ag < 0] = data3$ag_polimp[data3$ag < 0]
 
+
 data3$densidad_camiones = data3$densidad
 data3$densidad_camiones[data3$densidad < 0] = data3$densidad_polimp[data3$densidad < 0]
-
 data3$rec_denver_nir_min20_recmass10_camiones = data3$reccu_mass10
 data3$rec_denver_nir_min20_recmass10_camiones[data3$reccu_mass10 < 0] =
   data3$rec_denver_nir_min20_recmass10_polimp[data3$reccu_mass10 < 0]
 
-data3$rec_cu_denver_min20_camiones = data3$rec_denver_min20
-data3$rec_cu_denver_min20_camiones[data3$rec_denver_min20 < 0] = data3$rec_cu_denver_min20_polimp[data3$rec_denver_min20 < 0]
+data3$csp_cc_camiones = data3$csp_cc
+data3$csp_cc_camiones[data3$csp_cc < 0] = data3$cspcc_polimp[data3$csp_cc < 0]
 
-data3$rec_mass_denver_min20_camiones = data3$rec_mass_min20
-data3$rec_mass_denver_min20_camiones[data3$rec_mass_min20 < 0] = data3$rec_mass_denver_min20_polimp[data3$rec_mass_min20 < 0]
+data3$csp_cv_camiones = data3$csp_cv
+data3$csp_cv_camiones[data3$cspcv < 0] = data3$cspcv_polimp[data3$cspcv < 0]
+
+data3$csp_cpy_camiones = data3$csp_cpy
+data3$csp_cpy_camiones[data3$cspcpy < 0] = data3$cspcpy_polimp[data3$cspcpy < 0]
+
+data3$csp_cuoxi_camiones = data3$csp_cuoxi
+data3$csp_cuoxi_camiones[data3$csp_cuoxi < 0] = data3$cspcuoxi_polimp[data3$csp_cuoxi < 0]
+
+data3$csp_cuins_camiones = data3$csp_cuins
+data3$csp_cuins_camiones[data3$csp_cuins < 0] = data3$cspcuins_polimp[data3$csp_cuins < 0]
+data3$dumptons = data3$d.tonnage
 
 
 
 bd_p01 =
-  data3 %>% 
+  data3 %>%
   filter(cut_camiones >= 0) %>%
   group_by(origen)  %>%
   summarise(ton  = sum(dumptons),
             cut_avg_gps  = sum(dumptons *  cut_camiones)/ton)
-
 bd_p02 =
-  data3 %>% 
+  data3 %>%
   filter(cus_camiones >= 0) %>%
   group_by(origen)  %>%
   summarise(ton  = sum(dumptons),
             cus_avg_gps  = sum(dumptons *  cus_camiones)/ton)
-
 bd_p03 =
-  data3 %>% 
+  data3 %>%
   filter(cufe_camiones >= 0) %>%
   group_by(origen)  %>%
   summarise(ton  = sum(dumptons),
             cufe_avg_gps = sum(dumptons * cufe_camiones)/ton)
-
 bd_p04 =
-  data3 %>% 
+  data3 %>%
   filter(cucn_camiones >= 0) %>%
   group_by(origen)  %>%
   summarise(ton  = sum(dumptons),
             cucn_avg_gps = sum(dumptons * cucn_camiones)/ton)
-
 bd_p05 =
-  data3 %>% 
+  data3 %>%
   filter(co3_camiones >= 0) %>%
   group_by(origen)  %>%
   summarise(ton  = sum(dumptons),
             co3_avg_gps  = sum(dumptons *  co3_camiones)/ton)
-
 bd_p06 =
-  data3 %>% 
+  data3 %>%
   filter(malla100_camiones >= 0) %>%
   group_by(origen)  %>%
   summarise(ton  = sum(dumptons),
             malla100_avg_gps  = sum(dumptons * malla100_camiones )/ton)
-
 bd_p07 =
-  data3 %>% 
+  data3 %>%
   filter(lito_camiones >= 0) %>%
   group_by(origen)  %>%
   summarise(ton  = sum(dumptons),
             lito_avg_gps = which.max(table(lito_camiones)))
-
 bd_p08 =
-  data3 %>% 
+  data3 %>%
   filter(alte_camiones >= 0) %>%
   group_by(origen)  %>%
   summarise(ton  = sum(dumptons),
             alte_avg_gps = which.max(table(alte_camiones)))
-
 bd_p09 =
-  data3 %>% 
+  data3 %>%
   filter(minty_corto_camiones >= 0) %>%
   group_by(origen)  %>%
   summarise(ton  = sum(dumptons),
             minty_corto_avg_gps = which.max(table(minty_corto_camiones)))
-
 bd_p10 =
-  data3 %>% 
+  data3 %>%
   filter(rec_mx_cu_camiones >= 0) %>%
   group_by(origen)  %>%
   summarise(ton  = sum(dumptons),
             rec_mx_cu_avg_gps = sum(dumptons * rec_mx_cu_camiones)/ton)
-
 bd_p11 =
-  data3 %>% 
+  data3 %>%
   filter(mo_camiones >= 0) %>%
   group_by(origen)  %>%
   summarise(ton  = sum(dumptons),
             mo_avg_gps  = sum(dumptons *   mo_camiones)/ton)
-
 bd_p12 =
-  data3 %>% 
+  data3 %>%
   filter(bwi_camiones >= 0) %>%
   group_by(origen)  %>%
   summarise(ton  = sum(dumptons),
             bwi_avg_gps = sum(dumptons *  bwi_camiones)/ton)
-
 bd_p13 =
-  data3 %>% 
+  data3 %>%
   filter(spi_camiones>= 0) %>%
   group_by(origen)  %>%
   summarise(ton  = sum(dumptons),
             spi_avg_gps = sum(dumptons *  spi_camiones)/ton)
-
-
 bd_p14 =
-  data3 %>% 
+  data3 %>%
   filter(py_camiones >= 0) %>%
   group_by(origen)  %>%
   summarise(ton  = sum(dumptons),
             py_avg_gps   = sum(dumptons *  py_camiones)/ton)
-
 bd_p15 =
-  data3 %>% 
+  data3 %>%
   filter(musc_camiones >= 0) %>%
   group_by(origen)  %>%
   summarise(ton  = sum(dumptons),
             musc_avg_gps  = sum(dumptons *  musc_camiones)/ton)
-
 bd_p16 =
-  data3 %>% 
+  data3 %>%
   filter(quar_camiones >= 0) %>%
   group_by(origen)  %>%
   summarise(ton  = sum(dumptons),
             quar_avg_gps  = sum(dumptons *  quar_camiones)/ton)
-
 bd_p17 =
-  data3 %>% 
+  data3 %>%
   filter(bclay_camiones >= 0) %>%
   group_by(origen)  %>%
   summarise(ton  = sum(dumptons),
             bclay_avg_gps = sum(dumptons *  bclay_camiones)/ton)
-
 bd_p18 =
-  data3 %>% 
+  data3 %>%
   filter(as_camiones >= 0) %>%
   group_by(origen)  %>%
   summarise(ton  = sum(dumptons),
             as_avg_gps = sum(dumptons *  as_camiones)/ton)
-
 bd_p19 =
-  data3 %>% 
+  data3 %>%
   filter(au_camiones >= 0) %>%
   group_by(origen)  %>%
   summarise(ton  = sum(dumptons),
             au_avg_gps = sum(dumptons *  au_camiones)/ton)
-
 bd_p20 =
-  data3 %>% 
+  data3 %>%
   filter(ag_camiones >= 0) %>%
   group_by(origen)  %>%
   summarise(ton  = sum(dumptons),
             ag_avg_gps = sum(dumptons *  ag_camiones)/ton)
-
 bd_p21 =
-  data3 %>% 
+  data3 %>%
   filter(densidad_camiones >= 0) %>%
   group_by(origen)  %>%
   summarise(ton  = sum(dumptons),
             densidad_avg_gps = sum(dumptons *  densidad_camiones)/ton)
-
 bd_p22 =
-  data3 %>% 
+  data3 %>%
   filter(rec_denver_nir_min20_recmass10_camiones >= 0) %>%
   group_by(origen)  %>%
   summarise(ton  = sum(dumptons),
             rec_denver_nir_min20_recmass10_avg_gps = sum(dumptons * rec_denver_nir_min20_recmass10_camiones)/ton)
-
 bd_p23 =
-  data3 %>% 
-  filter(rec_cu_denver_min20_camiones >= 0) %>%
+  data3 %>%
+  filter(csp_cc_camiones >= 0) %>%
   group_by(origen)  %>%
   summarise(ton  = sum(dumptons),
-            rec_cu_denver_min20_avg_gps            = sum(dumptons * rec_cu_denver_min20_camiones)/ton)
-
+            csp_cc_avg_gps            = sum(dumptons * csp_cc_camiones)/ton)
 bd_p24 =
-  data3 %>% 
-  filter(rec_mass_denver_min20_camiones >= 0) %>%
+  data3 %>%
+  filter(csp_cpy_camiones >= 0) %>%
   group_by(origen)  %>%
   summarise(ton  = sum(dumptons),
-            rec_mass_denver_min20_avg_gps          = sum(dumptons * rec_mass_denver_min20_camiones)/ton)
+            csp_cpy_avg_gps          = sum(dumptons * csp_cpy_camiones)/ton)
+bd_p25 =
+  data3 %>%
+  filter(csp_cuins_camiones >= 0) %>%
+  group_by(origen)  %>%
+  summarise(ton  = sum(dumptons),
+            csp_cuins_avg_gps            = sum(dumptons * csp_cuins_camiones)/ton)
+bd_p26 =
+  data3 %>%
+  filter(csp_cuoxi_camiones >= 0) %>%
+  group_by(origen)  %>%
+  summarise(ton  = sum(dumptons),
+            csp_cuoxi_avg_gps            = sum(dumptons * csp_cuoxi_camiones)/ton)
+bd_p27 =
+  data3 %>%
+  filter(csp_cv_camiones >= 0) %>%
+  group_by(origen)  %>%
+  summarise(ton  = sum(dumptons),
+            csp_cv_avg_gps          = sum(dumptons * csp_cv_camiones)/ton)
 
 bd_p02 = bd_p02 %>% select(-ton)
 bd_p03 = bd_p03 %>% select(-ton)
@@ -286,115 +283,92 @@ bd_p21 = bd_p21 %>% select(-ton)
 bd_p22 = bd_p22 %>% select(-ton)
 bd_p23 = bd_p23 %>% select(-ton)
 bd_p24 = bd_p24 %>% select(-ton)
-
-
-
-bd_a01 = left_join(bd_p01,  
-                   bd_p02,  
+bd_p25 = bd_p25 %>% select(-ton)
+bd_p26 = bd_p26 %>% select(-ton)
+bd_p27 = bd_p27 %>% select(-ton)
+bd_a01 = left_join(bd_p01,
+                   bd_p02,
                    by = "origen")
-
-bd_a02 = left_join(bd_a01,  
-                   bd_p03,  
+bd_a02 = left_join(bd_a01,
+                   bd_p03,
                    by = "origen")
-
-bd_a03 = left_join(bd_a02,  
-                   bd_p04,  
+bd_a03 = left_join(bd_a02,
+                   bd_p04,
                    by = "origen")
-
-bd_a04 = left_join(bd_a03,  
-                   bd_p05,  
+bd_a04 = left_join(bd_a03,
+                   bd_p05,
                    by = "origen")
-
-bd_a05 = left_join(bd_a04,  
-                   bd_p06,  
+bd_a05 = left_join(bd_a04,
+                   bd_p06,
                    by = "origen")
-
-bd_a06 = left_join(bd_a05,  
-                   bd_p07,  
+bd_a06 = left_join(bd_a05,
+                   bd_p07,
                    by = "origen")
-
-bd_a07 = left_join(bd_a06,  
-                   bd_p08,  
+bd_a07 = left_join(bd_a06,
+                   bd_p08,
                    by = "origen")
-
-bd_a08 = left_join(bd_a07,  
-                   bd_p09,  
+bd_a08 = left_join(bd_a07,
+                   bd_p09,
                    by = "origen")
-
-bd_a09 = left_join(bd_a08,  
-                   bd_p10,  
+bd_a09 = left_join(bd_a08,
+                   bd_p10,
                    by = "origen")
-
-bd_a10 = left_join(bd_a09,  
-                   bd_p11,  
+bd_a10 = left_join(bd_a09,
+                   bd_p11,
                    by = "origen")
-
-bd_a11 = left_join(bd_a10,  
-                   bd_p12,  
+bd_a11 = left_join(bd_a10,
+                   bd_p12,
                    by = "origen")
-
-bd_a12 = left_join(bd_a11,  
-                   bd_p13,  
+bd_a12 = left_join(bd_a11,
+                   bd_p13,
                    by = "origen")
-
-bd_a13 = left_join(bd_a12,  
-                   bd_p14,  
+bd_a13 = left_join(bd_a12,
+                   bd_p14,
                    by = "origen")
-
-bd_a14 = left_join(bd_a13,  
-                   bd_p15,  
+bd_a14 = left_join(bd_a13,
+                   bd_p15,
                    by = "origen")
-
-bd_a15 = left_join(bd_a14,  
-                   bd_p16,  
+bd_a15 = left_join(bd_a14,
+                   bd_p16,
                    by = "origen")
-
-bd_a16 = left_join(bd_a15,  
-                   bd_p17,  
+bd_a16 = left_join(bd_a15,
+                   bd_p17,
                    by = "origen")
-
-bd_a17 = left_join(bd_a16,  
-                   bd_p18,  
+bd_a17 = left_join(bd_a16,
+                   bd_p18,
                    by = "origen")
-
-bd_a18 = left_join(bd_a17,  
-                   bd_p19,  
+bd_a18 = left_join(bd_a17,
+                   bd_p19,
                    by = "origen")
-
-bd_a19 = left_join(bd_a18,  
-                   bd_p20,  
+bd_a19 = left_join(bd_a18,
+                   bd_p20,
                    by = "origen")
-
-bd_a20 = left_join(bd_a19,  
-                   bd_p21,  
+bd_a20 = left_join(bd_a19,
+                   bd_p21,
                    by = "origen")
-
-bd_a21 = left_join(bd_a20,  
-                   bd_p22,  
+bd_a21 = left_join(bd_a20,
+                   bd_p22,
                    by = "origen")
-
-bd_a22 = left_join(bd_a21,  
-                   bd_p23,  
+bd_a22 = left_join(bd_a21,
+                   bd_p23,
                    by = "origen")
-
-bd_a23 = left_join(bd_a22,  
-                   bd_p24,  
+bd_a23 = left_join(bd_a22,
+                   bd_p24,
                    by = "origen")
-
-bd_patios2 = bd_a23
-
-
-
-
-data4 = left_join(data3, bd_patios2, 
+bd_a24 = left_join(bd_a23,
+                   bd_p25,
+                   by = "origen")
+bd_a25 = left_join(bd_a24,
+                   bd_p26,
+                   by = "origen")
+bd_a26 = left_join(bd_a25,
+                   bd_p27,
+                   by = "origen")
+bd_patios2 = bd_a26
+data4 = left_join(data3, bd_patios2,
                   by = "origen")
 
-
-
-
-
-
-
+data4 = replace(data4, is.na(data4), -99)
 data4$cut_camiones[data4$cut_camiones < 0] = data4$cut_avg_gps[data4$cut_camiones < 0]
 data4$cus_camiones[data4$cus_camiones < 0] = data4$cus_avg_gps[data4$cus_camiones < 0]
 data4$cufe_camiones[data4$cufe_camiones < 0] = data4$cufe_avg_gps[data4$cufe_camiones < 0]
@@ -417,52 +391,18 @@ data4$au_camiones[data4$au_camiones < 0] = data4$au_avg_gps[data4$au_camiones < 
 data4$ag_camiones[data4$ag_camiones < 0] = data4$ag_avg_gps[data4$ag_camiones < 0]
 data4$densidad_camiones[data4$densidad_camiones < 0] = data4$densidad_avg_gps[data4$densidad_camiones < 0]
 data4$rec_denver_nir_min20_recmass10_camiones[data4$rec_denver_nir_min20_recmass10_camiones < 0] = data4$rec_denver_nir_min20_recmass10_avg_gps[data4$rec_denver_nir_min20_recmass10_camiones < 0]
-data4$rec_cu_denver_min20_camiones[data4$rec_cu_denver_min20_camiones < 0] = data4$rec_cu_denver_min20_avg_gps[data4$rec_cu_denver_min20_camiones < 0]
-data4$rec_mass_denver_min20_camiones[data4$rec_mass_denver_min20_camiones < 0] = data4$rec_mass_denver_min20_avg_gps[data4$rec_mass_denver_min20_camiones < 0]
+data4$csp_cc_camiones[data4$csp_cc_camiones < 0]       = data4$csp_cc_avg_gps[data4$csp_cc_camiones < 0]
+data4$csp_cpy_camiones[data4$csp_cpy_camiones < 0]     = data4$csp_cpy_avg_gps[data4$csp_cpy_camiones < 0]
+data4$csp_cv_camiones[data4$csp_cv_camiones < 0]       = data4$csp_cv_avg_gps[data4$csp_cv_camiones < 0]
+data4$csp_cuins_camiones[data4$csp_cuins_camiones < 0] = data4$csp_cuins_avg_gps[data4$csp_cuins_camiones < 0]
+data4$csp_cuoxi_camiones[data4$csp_cuoxi_camiones < 0] = data4$csp_cuoxi_avg_gps[data4$csp_cuoxi_camiones < 0]
 
-nombres1 = c(
-"compid"     ,   
-"midx"        ,  
-"midy"         , 
-"midz"          ,
-"precid"        ,
-"loadstart"     ,
-"shiftdate"     ,
-"name"          ,
-"hora"          ,
-"timeload.x"    ,
-"timedump"      ,
-"excav"         ,
-"utype"         ,
-"tunit"         ,
-"tcapacity"     ,
-"fecha"         ,
-"dumptons"      ,
-"origen"        ,
-"destino"       ,
-"loadtons"      ,
-"bucketload"    ,
-"bucketloadtons",
-"bucket"        ,
-"bucketcount"   ,
-"diggpsgrade"   ,
-"digopergrade"  ,
-"grade.x"       ,
-"diggpsmat"     ,
-"digopmat"      ,
-"dispload"      ,
-"loc.y"         ,
-"edlock.y"      ,
-"gpsxtkd"       ,
-"gpsytkd"       ,
-"gpsztkd"       ,
-"internal")
 
+nombres1 = names(data4)[1:30]
 nombres2 = names(data4)[str_detect(names(data4), "_camiones")]
 nombres = c(nombres1, nombres2)
 
 data5 = as.data.frame(data4)[,nombres]
 
-fwrite(data5, "W08_camiones.csv")
 
-
+fwrite(data5, "W14_camiones_v1.csv")
