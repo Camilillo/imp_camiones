@@ -1,0 +1,14 @@
+library("data.table")
+library("stringr")
+
+setwd("C:\\Users\\lillcam\\Documents\\F2_IMP\\solidos_MR_v2_coord_corta.tri")
+
+nombres = 
+list.files("C:\\Users\\lillcam\\Documents\\F2_IMP\\solidos_MR_v2_coord_corta.tri", 
+           pattern = "00t", recursive = TRUE, full.names = TRUE)
+
+fecha = str_replace(paste(substr(str_split(nombres, "/", simplify = TRUE)[,2], 1, 7), str_sub(str_split(nombres, "/", simplify = TRUE)[,3], 1, 2), sep = ""), "_", "")
+
+
+fwrite(data.frame(nombres, fecha)[str_detect(tolower(nombres), "ch01"),], "lista_ch01.csv")
+fwrite(data.frame(nombres, fecha)[str_detect(tolower(nombres), "ch02"),], "lista_ch02.csv")
